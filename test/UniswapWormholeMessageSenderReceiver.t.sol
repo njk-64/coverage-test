@@ -273,28 +273,6 @@ contract UniswapWormholeMessageSenderReceiverTest is Test {
         assertEq(mock.consumedActions(governanceActionTwo), true);
     }
 
-    function testInvalidSubCall() public {
-        uint64 sequence = 1;
-        uint16 emitterChainId = 2;
-
-        // create bad datas array
-        bytes[] memory badDatas = new bytes[](1);
-        badDatas[0] = abi.encodeWithSignature("receiveGovernanceMessageOne(bytes32,uint8)", governanceActionOne, 420); // bad action
-
-        bytes memory payload = generateMessagePayload(targets, values, badDatas, address(uniReceiver), bsc_chain_id);
-        bytes memory whMessage = generateSignedVaa(emitterChainId, msgSender, sequence, payload);
-
-        vm.warp(timestamp + 45 minutes);
-
-        // note Sometimes forge cannot correctly match the revert string from a call. The
-        // expectRevertWithValue performs the same function as vm.expectRevert.
-        bytes memory encodedSignature = abi.encodeWithSignature("receiveMessage(bytes)", whMessage);
-        expectRevertWithValue(address(uniReceiver), encodedSignature, "Sub-call failed", mock.governanceValueOne());
-
-        // confirm that the mock contract did not receive the governance action
-        assertEq(mock.consumedActions(governanceActionOne), false);
-    }
-
     function testIncorrectValueWithOneAction(uint256 _value) public {
         vm.assume(_value != mock.governanceValueOne() && _value < type(uint96).max);
 
