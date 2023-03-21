@@ -209,6 +209,18 @@ contract UniswapWormholeMessageSenderReceiverTest is Test {
         uniSender.sendMessage{value: 0}(targets, values, datas, address(uniReceiver), bsc_chain_id);
     }
 
+    function testSendMessageFailureMessageFeeTooLarge() public {
+        // update the wormhole message fee
+        uint256 messageFee = 1e6;
+        updateWormholeMessageFee(messageFee);
+
+        // call `sendMessage` with a fee greater than what is set in the wormhole contract
+        uint256 invalidFee = 1e18;
+
+        vm.expectRevert("invalid message fee");
+        uniSender.sendMessage{value: invalidFee}(targets, values, datas, address(uniReceiver), bsc_chain_id);
+    }
+
     function testReceiveMessageSuccessWithOneAction() public {
         uint64 sequence = 0;
         uint16 emitterChainId = 2;

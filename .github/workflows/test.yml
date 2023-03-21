@@ -42,5 +42,5 @@ jobs:
         run: |
           forge coverage --report lcov
         id: coverage
-
+        
       - uses: codecov/codecov-action@v2
